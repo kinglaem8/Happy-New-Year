@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Carte WhatsApp 2026</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin:0; padding:0; overflow:hidden;
+    background: radial-gradient(circle at bottom, #000814, #ff0044);
+    color: #fff;
+}
+canvas { position: fixed; top:0; left:0; z-index:0; }
+#header {
+    position: fixed;
+    top:10px;
+    left:10px;
+    z-index:3;
+}
+#header button {
+    background:#ff9800;
+    color:#fff;
+    padding:5px 10px;
+    font-size:0.9em;
+    border-radius:5px;
+    cursor:pointer;
+}
+#mainDiv {
+    position: relative;
+    z-index:2;
+    max-width: 550px;
+    margin: 80px auto 50px auto;
+    padding: 30px;
+    background: rgba(0,0,0,0.7);
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(0,0,0,0.7);
+}
+h1 { font-size:2em; margin-bottom:10px; color:#ffeb3b; }
+h2 { font-size:1.2em; margin-bottom:20px; }
+input, textarea, button { width:100%; padding:12px; margin:8px 0; border-radius:10px; border:none; font-size:1em; }
+button.send { background:#25D366; font-weight:bold; cursor:pointer; color:#fff; transition:all 0.3s; }
+button.send:hover { background:#1ebe5d; transform: scale(1.05); }
+#ratingForm { display:none; margin-top:20px; }
+.stars span { font-size:2.5em; cursor:pointer; color:#555; transition:transform 0.2s; }
+.stars span:hover { transform:scale(1.2); }
+.stars span.hover, .stars span.selected { color:gold; }
+.message { margin-top:15px; font-size:1.2em; color:#ffeb3b; }
+.contact { margin-top:20px; font-size:1em; color:#ffeb3b; }
+.contact a { color:#fff; text-decoration:underline; }
+.contact button { margin-top:10px; background:#25D366; color:#fff; padding:6px 12px; border-radius:5px; cursor:pointer; }
+.floating { position: fixed; font-size:2em; z-index:1; pointer-events:none; user-select:none; font-weight:bold; }
+</style>
+</head>
+<body>
+
+<canvas id="fireworks"></canvas>
+
+<div id="header">
+    <button onclick="shareLink()">Partager</button>
+</div>
+
+<div id="mainDiv">
+    <h1>🎆 Bonne Année 2026 🎆</h1>
+    <h2>Envoyez vos vœux sur WhatsApp !</h2>
+
+    <input id="name" type="text" placeholder="Nom du destinataire">
+    <input id="phone" type="text" placeholder="Numéro WhatsApp (509XXXXXXXX)">
+    <textarea id="message" rows="4" placeholder="Votre message de vœux..."></textarea>
+    <input id="userName" type="text" placeholder="Votre nom (pour la notation)">
+    <button class="send" onclick="sendWhatsApp()">📩 Envoyer sur WhatsApp</button>
+
+    <form id="ratingForm">
+        <h2>Notez notre site 🌟</h2>
+        <div class="stars">
+            <span data-value="1">★</span>
+            <span data-value="2">★</span>
+            <span data-value="3">★</span>
+            <span data-value="4">★</span>
+            <span data-value="5">★</span>
+        </div>
+        <textarea id="comment" rows="3" placeholder="Laissez un commentaire"></textarea>
+        <button type="button" onclick="submitRating()">Envoyer la note</button>
+    </form>
+
+    <div class="message" id="thankMessage"></div>
+
+    <div class="contact">
+        Pour me contacter : <a href="mailto: lineskyhonore7@gmail.com">lineskyhonore7@gmail.com</a><br>
+        <button onclick="contactWhatsApp()">💬 WhatsApp</button>
+    </div>
+</div>
+
+<script>
+// -------- Partage --------
+function shareLink(){
+    if(navigator.share){
+        navigator.share({title:'Carte WhatsApp 2026', url:window.location.href});
+    } else {
+        navigator.clipboard.writeText(window.location.href);
+        alert("Lien copié dans le presse-papiers !");
+    }
+}
+
+// -------- WhatsApp --------
+function sendWhatsApp(){
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const msg = document.getElementById('message').value.trim();
+    if(!name || !phone || !msg){ alert("Tous les champs sont requis !"); return; }
+    const fullMessage = `🎆 Bonjour ${name} 🎆\n\n${msg}\n\n— Carte WhatsApp 2026`;
+    window.open("https://wa.me/"+phone+"?text="+encodeURIComponent(fullMessage), "_blank");
+    setTimeout(()=>{ document.getElementById('ratingForm').style.display='block'; },1000);
+}
+
+// -------- Notation --------
+let selectedRating = 0;
+const stars = document.querySelectorAll('.stars span');
+stars.forEach(s=>{
+    s.addEventListener('mouseover',()=>{ stars.forEach(st=>st.classList.remove('hover')); for(let i=0;i<parseInt(s.dataset.value);i++) stars[i].classList.add('hover'); });
+    s.addEventListener('mouseout',()=>stars.forEach(st=>st.classList.remove('hover')));
+    s.addEventListener('click',()=>{ selectedRating=parseInt(s.dataset.value); stars.forEach(st=>st.classList.remove('selected')); for(let i=0;i<selectedRating;i++) stars[i].classList.add('selected'); });
+});
+function submitRating(){
+    const userName = document.getElementById('userName').value.trim();
+    const comment = document.getElementById('comment').value.trim();
+    if(selectedRating===0 || !userName){ alert("Veuillez donner votre nom et une note !"); return; }
+    console.log("Nom:", userName, "| Note:", selectedRating, "| Commentaire:", comment);
+    document.getElementById('ratingForm').style.display='none';
+    document.getElementById('thankMessage').innerText="Merci pour votre note !";
+    localStorage.setItem('lastRating', JSON.stringify({name:userName,rating:selectedRating,comment:comment}));
+}
+
+// -------- Contact WhatsApp --------
+function contactWhatsApp(){
+    const phone = "509XXXXXXXX"; // Remplace par ton numéro
+    const defaultMessage = "Bonjour ! Je souhaite vous contacter."; 
+    window.open("https://wa.me/" + phone + "?text=" + encodeURIComponent(defaultMessage), "_blank");
+}
+
+// -------- Feux d'artifice Canvas --------
+const canvas = document.getElementById('fireworks');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+let fireworks=[], particles=[];
+function Firework(){ this.x=Math.random()*canvas.width; this.y=canvas.height+10; this.targetY=Math.random()*canvas.height/2; this.speed=Math.random()*5+3; this.color=`hsl(${Math.random()*360},100%,50%)`; }
+Firework.prototype.update=function(){ this.y-=this.speed; if(this.y<=this.targetY){ explode(this.x,this.y,this.color); this.y=canvas.height+10; this.targetY=Math.random()*canvas.height/2; } }
+function explode(x,y,color){ for(let i=0;i<25;i++){ particles.push({x:x,y:y,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.5)*6,alpha:1,color:color}); } }
+function animate(){
+    ctx.fillStyle='rgba(0,0,0,0.2)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    fireworks.forEach(fw=>fw.update());
+    for(let i=0;i<particles.length;i++){
+        const p=particles[i];
+        ctx.fillStyle=p.color; ctx.globalAlpha=p.alpha; ctx.beginPath(); ctx.arc(p.x,p.y,3,0,Math.PI*2); ctx.fill();
+        p.x+=p.vx; p.y+=p.vy; p.alpha-=0.02;
+        if(p.alpha<=0){ particles.splice(i,1); i--; }
+    }
+    requestAnimationFrame(animate);
+}
+for(let i=0;i<8;i++){ fireworks.push(new Firework()); }
+animate();
+setInterval(()=>{ fireworks.push(new Firework()); },500);
+
+// -------- Emojis et chiffres flottants --------
+const floatingItems = ['😎','✨','💫','🌟','🫶🏻','🎉','🎊','🎇','🎆','2','0','2','6'];
+for(let i=0;i<25;i++){
+    const div = document.createElement('div');
+    div.className='floating';
+    div.innerText = floatingItems[Math.floor(Math.random()*floatingItems.length)];
+    div.style.left = Math.random()*window.innerWidth+'px';
+    div.style.top = Math.random()*window.innerHeight+'px';
+    div.speedX = (Math.random()-0.5)*1.2;
+    div.speedY = (Math.random()-0.5)*1.2;
+    if(['2','0','2','6'].includes(div.innerText)){
+        div.style.color = `hsl(${Math.random()*360}, 100%, 70%)`;
+        div.style.fontSize = '2.5em';
+    }
+    document.body.appendChild(div);
+}
+
+function animateFloating(){
+    document.querySelectorAll('.floating').forEach(e=>{
+        let x = parseFloat(e.style.left);
+        let y = parseFloat(e.style.top);
+        x += e.speedX; y += e.speedY;
+        if(x<0) x=window.innerWidth; if(x>window.innerWidth) x=0;
+        if(y<0) y=window.innerHeight; if(y>window.innerHeight) y=0;
+        e.style.left = x+'px';
+        e.style.top = y+'px';
+    });
+    requestAnimationFrame(animateFloating);
+}
+animateFloating();
+</script>
+
+</body>
+</html>
